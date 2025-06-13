@@ -1,65 +1,54 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calculator, Info, Phone, User, LogOut } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Home, Search, Layout, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { LoginForm } from './auth/LoginForm';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
-interface NavigationProps {
-  selectedFabric: string | null;
-  onBack: () => void;
-  showEstimator: () => void;
-}
-
-const Navigation = ({ selectedFabric, onBack, showEstimator }: NavigationProps) => {
+const Navigation = () => {
   const { user, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const location = useLocation();
+
+  const navItems = [
+    { path: '/', icon: Home, label: 'Home' },
+    { path: '/explore', icon: Search, label: 'Explore' },
+    { path: '/moodboard', icon: Layout, label: 'Moodboard' },
+  ];
 
   return (
     <>
-      <nav className="bg-white/90 backdrop-blur-sm border-b border-stone-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:flex fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-b border-stone-200 z-30">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {selectedFabric && (
-                <Button
-                  variant="ghost"
-                  onClick={onBack}
-                  className="text-stone-600 hover:text-stone-800"
+            <Link to="/" className="text-2xl font-bold text-stone-800">
+              Weave
+            </Link>
+            
+            <div className="flex items-center gap-6">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    location.pathname === item.path
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'text-stone-600 hover:text-stone-800 hover:bg-stone-100'
+                  }`}
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Fabrics
-                </Button>
-              )}
-              <h1 className="text-xl font-bold text-stone-800">
-                Weave - Textile Catalog
-              </h1>
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </Link>
+              ))}
             </div>
             
-            <div className="flex items-center gap-2">
-              {selectedFabric && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={showEstimator}
-                  className="hidden sm:flex"
-                >
-                  <Calculator className="w-4 h-4 mr-2" />
-                  Price Estimator
-                </Button>
-              )}
-              <Button variant="ghost" size="sm">
-                <Info className="w-4 h-4 mr-2" />
-                About
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Phone className="w-4 h-4 mr-2" />
-                Contact
-              </Button>
-              
+            <div className="flex items-center gap-4">
               {user ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="text-sm text-stone-600">{user.email}</span>
                   <Button
                     variant="ghost"
@@ -81,6 +70,56 @@ const Navigation = ({ selectedFabric, onBack, showEstimator }: NavigationProps) 
               )}
             </div>
           </div>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-stone-200 z-30">
+        <div className="flex justify-around py-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex flex-col items-center gap-1 p-3 rounded-lg transition-colors ${
+                location.pathname === item.path
+                  ? 'text-amber-700'
+                  : 'text-stone-600'
+              }`}
+            >
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className={`p-2 rounded-lg ${
+                  location.pathname === item.path ? 'bg-amber-100' : ''
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+              </motion.div>
+              <span className="text-xs font-medium">{item.label}</span>
+            </Link>
+          ))}
+          
+          {/* Auth Button for Mobile */}
+          {user ? (
+            <button
+              onClick={() => signOut()}
+              className="flex flex-col items-center gap-1 p-3 text-stone-600"
+            >
+              <div className="p-2">
+                <LogOut className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">Sign Out</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="flex flex-col items-center gap-1 p-3 text-stone-600"
+            >
+              <div className="p-2">
+                <User className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">Sign In</span>
+            </button>
+          )}
         </div>
       </nav>
 

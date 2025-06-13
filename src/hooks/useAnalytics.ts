@@ -22,5 +22,28 @@ export function useAnalytics() {
     }
   }
 
-  return { trackEvent }
+  // Convenience methods for common events
+  const logFabricView = (fabricId: string) => {
+    trackEvent('view_fabric', { fabric_id: fabricId })
+  }
+
+  const logAddToMoodboard = (fabricId: string) => {
+    trackEvent('add_to_moodboard', { fabric_id: fabricId })
+  }
+
+  const logCompareOpen = (fabricIds: string[]) => {
+    trackEvent('compare_open', { fabric_ids: fabricIds })
+  }
+
+  const logRequestSwatch = (fabricId: string) => {
+    trackEvent('request_swatch', { fabric_id: fabricId })
+  }
+
+  return { 
+    trackEvent,
+    logFabricView,
+    logAddToMoodboard,
+    logCompareOpen,
+    logRequestSwatch
+  }
 }

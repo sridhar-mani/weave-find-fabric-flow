@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -67,6 +68,9 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			dropShadow: {
+				'md': '0 4px 6px -1px rgb(0 0 0 / 0.1)',
 			},
 			keyframes: {
 				'accordion-down': {
