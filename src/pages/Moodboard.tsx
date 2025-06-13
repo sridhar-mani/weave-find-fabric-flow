@@ -1,76 +1,88 @@
 
-import { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Eye } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Plus, X } from 'lucide-react';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { fabricTypes } from '@/data/fabricData';
-import PackDrawer from '@/components/PackDrawer';
+
+interface MoodboardItem {
+  id: string;
+  type: 'fabric' | 'trim';
+  fabricId?: string;
+  name: string;
+  category: string;
+}
 
 const Moodboard = () => {
-  const [moodboardItems, setMoodboardItems] = useState<string[]>([]);
-  const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('moodboard');
-    if (saved) {
-      setMoodboardItems(JSON.parse(saved));
-    }
-  }, []);
+  const [items, setItems] = useState<MoodboardItem[]>([]);
+  const { logEvent } = useAnalytics();
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
-    const items = Array.from(moodboardItems);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const newItems = Array.from(items);
+    const [reorderedItem] = newItems.splice(result.source.index, 1);
+    newItems.splice(result.destination.index, 0, reorderedItem);
 
-    setMoodboardItems(items);
-    localStorage.setItem('moodboard', JSON.stringify(items));
+    setItems(newItems);
+    localStorage.setItem('moodboard', JSON.stringify(newItems));
   };
 
-  const removeFabric = (fabricId: string) => {
-    const updated = moodboardItems.filter(id => id !== fabricId);
-    setMoodboardItems(updated);
-    localStorage.setItem('moodboard', JSON.stringify(updated));
+  const addFabric = (fabricId: string) => {
+    const fabric = fabricTypes.find(f => f.id === fabricId);
+    if (!fabric) return;
+
+    const newItem: MoodboardItem = {
+      id: `fabric-${fabricId}-${Date.now()}`,
+      type: 'fabric',
+      fabricId,
+      name: fabric.name,
+      category: fabric.category
+    };
+
+    setItems([...items, newItem]);
+    localStorage.setItem('moodboard', JSON.stringify([...items, newItem]));
+    logEvent('add_to_moodboard', { fabric_id: fabricId });
   };
 
-  const openDrawer = (fabricId: string) => {
-    setSelectedFabric(fabricId);
-  };
-
-  const closeDrawer = () => {
-    setSelectedFabric(null);
+  const removeItem = (id: string) => {
+    const newItems = items.filter(item => item.id !== id);
+    setItems(newItems);
+    localStorage.setItem('moodboard', JSON.stringify(newItems));
   };
 
   return (
-    <div className="min-h-screen pt-16 p-6">
-      <motion.div 
-        className="max-w-6xl mx-auto"
+    <div className="min-h-screen pt-20 pb-24 lg:pb-8 px-4">
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        className="max-w-6xl mx-auto"
       >
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-stone-800 mb-2">My Moodboard</h1>
-          <p className="text-stone-600">
-            Drag and drop to reorder your fabric selections. Double-click to view details.
-          </p>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-stone-800">My Moodboard</h1>
+          <Button
+            onClick={() => addFabric(fabricTypes[0].id)}
+            className="bg-amber-600 hover:bg-amber-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Sample
+          </Button>
         </div>
 
-        {moodboardItems.length === 0 ? (
-          <motion.div 
-            className="text-center py-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <p className="text-stone-600 mb-4">Your moodboard is empty</p>
-            <Button onClick={() => window.location.href = '/explore'}>
-              Start Exploring Fabrics
+        {items.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-stone-500 mb-4">Your moodboard is empty</p>
+            <Button
+              onClick={() => addFabric(fabricTypes[0].id)}
+              variant="outline"
+            >
+              Add your first fabric
             </Button>
-          </motion.div>
+          </div>
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="moodboard">
@@ -78,66 +90,57 @@ const Moodboard = () => {
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                  {moodboardItems.map((fabricId, index) => {
-                    const fabric = fabricTypes.find(f => f.id === fabricId);
-                    if (!fabric) return null;
-
-                    return (
-                      <Draggable key={fabricId} draggableId={fabricId} index={index}>
-                        {(provided, snapshot) => (
-                          <motion.div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`${snapshot.isDra gging ? 'rotate-3 scale-105' : ''}`}
-                            whileHover={{ scale: 1.02 }}
-                            onDoubleClick={() => openDrawer(fabricId)}
-                          >
-                            <Card className="bg-white/60 backdrop-blur-sm border-stone-200 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
-                              <CardContent className="p-0">
-                                <div className="aspect-square bg-gradient-to-br from-stone-200 to-stone-300 relative">
-                                  <div className="absolute top-2 right-2 flex gap-1">
-                                    <Button
-                                      size="sm"
-                                      variant="secondary"
-                                      className="w-8 h-8 p-0 bg-white/80 hover:bg-white"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openDrawer(fabricId);
-                                      }}
-                                    >
-                                      <Eye className="w-3 h-3" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      className="w-8 h-8 p-0 bg-red-500/80 hover:bg-red-500"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeFabric(fabricId);
-                                      }}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                                <div className="p-4">
-                                  <h3 className="font-semibold text-stone-800 text-sm mb-1">
-                                    {fabric.name}
+                  {items.map((item, index) => (
+                    <Draggable key={item.id} draggableId={item.id} index={index}>
+                      {(provided, snapshot) => (
+                        <motion.div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          whileHover={{ scale: 1.02 }}
+                          className={`${
+                            snapshot.isDragging ? 'rotate-2 shadow-xl' : ''
+                          }`}
+                        >
+                          <Card className="bg-white/60 backdrop-blur-sm border-stone-200 shadow-md hover:shadow-xl transition-all duration-300">
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between mb-3">
+                                <div>
+                                  <h3 className="font-semibold text-stone-800 mb-1">
+                                    {item.name}
                                   </h3>
-                                  <p className="text-stone-600 text-xs line-clamp-2">
-                                    {fabric.description}
-                                  </p>
+                                  <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800">
+                                    {item.category}
+                                  </Badge>
                                 </div>
-                              </CardContent>
-                            </Card>
-                          </motion.div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeItem(item.id)}
+                                  className="text-stone-400 hover:text-red-500"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              
+                              <div className="aspect-square bg-gradient-to-br from-stone-200 to-stone-300 rounded-lg mb-3"></div>
+                              
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="sm" className="flex-1">
+                                  View Details
+                                </Button>
+                                <Button size="sm" className="flex-1 bg-amber-600 hover:bg-amber-700">
+                                  Request Swatch
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      )}
+                    </Draggable>
+                  ))}
                   {provided.placeholder}
                 </div>
               )}
@@ -145,12 +148,6 @@ const Moodboard = () => {
           </DragDropContext>
         )}
       </motion.div>
-
-      <PackDrawer 
-        fabricId={selectedFabric} 
-        isOpen={!!selectedFabric} 
-        onClose={closeDrawer} 
-      />
     </div>
   );
 };
