@@ -1,7 +1,7 @@
 
 import { useState, useEffect, createContext, useContext } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
@@ -11,6 +11,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
   loading: boolean
+  isConfigured: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,10 +22,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
+      setLoading(false)
+    }).catch(error => {
+      console.error('Auth error:', error)
       setLoading(false)
     })
 
@@ -41,21 +50,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase not configured')
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
   }
 
   const signUp = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase not configured')
+    }
     const { error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
   }
 
   const signInWithGoogle = async () => {
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase not configured')
+    }
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' })
     if (error) throw error
   }
 
   const signOut = async () => {
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase not configured')
+    }
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }
@@ -68,7 +89,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signUp,
       signInWithGoogle,
       signOut,
-      loading
+      loading,
+      isConfigured: isSupabaseConfigured
     }}>
       {children}
     </AuthContext.Provider>

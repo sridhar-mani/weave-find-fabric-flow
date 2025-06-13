@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAnalytics } from './useAnalytics';
 
 interface Fabric {
@@ -27,6 +27,12 @@ export function useFabricSearch() {
     minGsm: number = 0,
     maxGsm: number = 2000
   ) => {
+    if (!isSupabaseConfigured) {
+      console.log('Search request (Supabase not configured):', { query, construction, minGsm, maxGsm })
+      setError('Supabase not configured. Please set up your environment variables.')
+      return
+    }
+
     setLoading(true);
     setError(null);
 
@@ -59,6 +65,12 @@ export function useFabricSearch() {
   };
 
   const getFabricByCode = async (code: string) => {
+    if (!isSupabaseConfigured) {
+      console.log('Fabric fetch request (Supabase not configured):', code)
+      setError('Supabase not configured. Please set up your environment variables.')
+      return null
+    }
+
     setLoading(true);
     setError(null);
 
