@@ -9,12 +9,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { fabricTypes } from '@/data/fabricData';
 
 const Home = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(`/explore${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`);
+    navigate(
+      `/explore${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ""}`
+    );
   };
 
   const trendingFabrics = fabricTypes.slice(0, 3);
@@ -22,7 +24,7 @@ const Home = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero Section */}
-      <motion.section 
+      <motion.section
         className="flex-1 flex items-center justify-center px-4 py-20"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -34,16 +36,14 @@ const Home = () => {
             animate={{ scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h1 className="text-6xl font-bold text-stone-800 mb-4">
-              Weave
-            </h1>
+            <h1 className="text-6xl font-bold text-stone-800 mb-4">Weave</h1>
             <p className="text-xl text-stone-600 mb-8">
-              Discover, compare, and source premium textiles for your next collection
+              Discover, compare, and source premium textiles for your next
+              collection
             </p>
           </motion.div>
-
           {/* Search Bar */}
-          <motion.form 
+          <motion.form
             onSubmit={handleSearch}
             className="max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
@@ -58,7 +58,7 @@ const Home = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 pr-32 py-6 text-lg bg-white/80 backdrop-blur-sm border-stone-200 rounded-full shadow-lg"
               />
-              <Button 
+              <Button
                 type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full px-6"
               >
@@ -67,27 +67,26 @@ const Home = () => {
               </Button>
             </div>
           </motion.form>
-
           {/* Start Exploring CTA */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <Button 
-              onClick={() => navigate('/explore')}
+            <Button
+              onClick={() => navigate("/explore")}
               variant="outline"
               size="lg"
               className="bg-white/60 backdrop-blur-sm hover:bg-white/80"
             >
               Start Exploring
             </Button>
-          </motion.div>
-        </div>
+          </motion.div>{" "}
+        </div>{" "}
       </motion.section>
 
       {/* Trending Fabrics */}
-      <motion.section 
+      <motion.section
         className="py-16 px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -106,7 +105,7 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: 0.9 + index * 0.1 }}
                 whileHover={{ scale: 1.02, rotate: 1 }}
                 className="cursor-pointer"
-                onClick={() => navigate('/explore')}
+                onClick={() => navigate("/explore")}
               >
                 <Card className="bg-white/60 backdrop-blur-sm border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-0">
