@@ -1,6 +1,10 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calculator, Info, Phone } from 'lucide-react';
+import { ArrowLeft, Calculator, Info, Phone, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+import { LoginForm } from './auth/LoginForm';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface NavigationProps {
   selectedFabric: string | null;
@@ -9,50 +13,83 @@ interface NavigationProps {
 }
 
 const Navigation = ({ selectedFabric, onBack, showEstimator }: NavigationProps) => {
+  const { user, signOut } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   return (
-    <nav className="bg-white/90 backdrop-blur-sm border-b border-stone-200 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {selectedFabric && (
-              <Button
-                variant="ghost"
-                onClick={onBack}
-                className="text-stone-600 hover:text-stone-800"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Fabrics
+    <>
+      <nav className="bg-white/90 backdrop-blur-sm border-b border-stone-200 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {selectedFabric && (
+                <Button
+                  variant="ghost"
+                  onClick={onBack}
+                  className="text-stone-600 hover:text-stone-800"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Fabrics
+                </Button>
+              )}
+              <h1 className="text-xl font-bold text-stone-800">
+                Weave - Textile Catalog
+              </h1>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {selectedFabric && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={showEstimator}
+                  className="hidden sm:flex"
+                >
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Price Estimator
+                </Button>
+              )}
+              <Button variant="ghost" size="sm">
+                <Info className="w-4 h-4 mr-2" />
+                About
               </Button>
-            )}
-            <h1 className="text-xl font-bold text-stone-800">
-              Textile Supplier Hub
-            </h1>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {selectedFabric && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={showEstimator}
-                className="hidden sm:flex"
-              >
-                <Calculator className="w-4 h-4 mr-2" />
-                Price Estimator
+              <Button variant="ghost" size="sm">
+                <Phone className="w-4 h-4 mr-2" />
+                Contact
               </Button>
-            )}
-            <Button variant="ghost" size="sm">
-              <Info className="w-4 h-4 mr-2" />
-              About
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Phone className="w-4 h-4 mr-2" />
-              Contact
-            </Button>
+              
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-stone-600">{user.email}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => signOut()}
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAuthModal(true)}
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="max-w-md">
+          <LoginForm />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
