@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
-import Moodboard from "./pages/Moodboard";
+import Collection from "./pages/Collection";
 import NotFound from "./pages/NotFound";
 import Navigation from "./components/Navigation";
 
@@ -25,7 +25,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/explore" element={<Explore />} />
-              <Route path="/moodboard" element={<Moodboard />} />
+              <Route path="/collection" element={<Collection />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

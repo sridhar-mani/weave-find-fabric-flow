@@ -27,8 +27,8 @@ export function useAnalytics() {
     trackEvent('view_fabric', { fabric_id: fabricId })
   }
 
-  const logAddToMoodboard = (fabricId: string) => {
-    trackEvent('add_to_moodboard', { fabric_id: fabricId })
+  const logAddToCollection = (fabricId: string) => {
+    trackEvent('add_to_collection', { fabric_id: fabricId })
   }
 
   const logCompareOpen = (fabricIds: string[]) => {
@@ -39,11 +39,16 @@ export function useAnalytics() {
     trackEvent('request_swatch', { fabric_id: fabricId })
   }
 
+  const logReserveYardage = (fabricId: string, yards: number) => {
+    trackEvent('reserve_yardage', { fabric_id: fabricId, yards })
+  }
+
   return { 
     trackEvent,
     logFabricView,
-    logAddToMoodboard,
+    logAddToCollection,
     logCompareOpen,
-    logRequestSwatch
+    logRequestSwatch,
+    logReserveYardage
   }
 }

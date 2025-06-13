@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { LoginForm } from './auth/LoginForm';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
@@ -14,9 +13,21 @@ const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/explore', icon: Search, label: 'Explore' },
-    { path: '/moodboard', icon: Layout, label: 'Moodboard' },
+    {
+      path: '/',
+      icon: Home,
+      label: 'Home'
+    },
+    {
+      path: '/explore',
+      icon: Search,
+      label: 'Explore'
+    },
+    {
+      path: '/collection',
+      icon: Layout,
+      label: 'Collection'
+    }
   ];
 
   return (
@@ -45,7 +56,7 @@ const Navigation = () => {
                 </Link>
               ))}
             </div>
-            
+
             <div className="flex items-center gap-4">
               {user ? (
                 <div className="flex items-center gap-3">
@@ -83,48 +94,29 @@ const Navigation = () => {
               className={`flex flex-col items-center gap-1 p-3 rounded-lg transition-colors ${
                 location.pathname === item.path
                   ? 'text-amber-700'
-                  : 'text-stone-600'
+                  : 'text-stone-600 hover:text-stone-800'
               }`}
             >
-              <motion.div
-                whileTap={{ scale: 0.9 }}
-                className={`p-2 rounded-lg ${
-                  location.pathname === item.path ? 'bg-amber-100' : ''
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-              </motion.div>
-              <span className="text-xs font-medium">{item.label}</span>
+              <item.icon className="w-5 h-5" />
+              <span className="text-xs">{item.label}</span>
             </Link>
           ))}
           
-          {/* Auth Button for Mobile */}
-          {user ? (
-            <button
-              onClick={() => signOut()}
-              className="flex flex-col items-center gap-1 p-3 text-stone-600"
-            >
-              <div className="p-2">
-                <LogOut className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-medium">Sign Out</span>
-            </button>
-          ) : (
+          {!user && (
             <button
               onClick={() => setShowAuthModal(true)}
-              className="flex flex-col items-center gap-1 p-3 text-stone-600"
+              className="flex flex-col items-center gap-1 p-3 rounded-lg text-stone-600 hover:text-stone-800 transition-colors"
             >
-              <div className="p-2">
-                <User className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-medium">Sign In</span>
+              <User className="w-5 h-5" />
+              <span className="text-xs">Sign In</span>
             </button>
           )}
         </div>
       </nav>
 
+      {/* Auth Modal */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <LoginForm />
         </DialogContent>
       </Dialog>
