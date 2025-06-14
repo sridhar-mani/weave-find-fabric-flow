@@ -19,6 +19,7 @@ import {
   ChevronRight,
   LogOut,
   Briefcase,
+  Truck,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
@@ -34,7 +35,6 @@ const Sidebar = () => {
   useEffect(() => {
     setIsMobileOpen(false);
   }, [location.pathname]);
-
   const userNavItems = [
     {
       path: "/",
@@ -74,6 +74,12 @@ const Sidebar = () => {
       path: "/quotes",
       icon: ShoppingCart,
       label: "Quote Requests",
+      requiresAuth: true,
+    },
+    {
+      path: "/orders",
+      icon: Truck,
+      label: "Order Tracking",
       requiresAuth: true,
     },
     {

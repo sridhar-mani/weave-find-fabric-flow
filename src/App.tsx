@@ -7,7 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import Collection from "./pages/Collection";
-import Materials from "./pages/Materials";
+import MaterialsMarketplace from "./pages/MaterialsMarketplace";
 import TextileAnalytics from "./pages/TextileAnalytics";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
@@ -15,8 +15,19 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminCodeEditor from "./pages/AdminCodeEditor";
 import AdminDataManagement from "./pages/AdminDataManagement";
 import AdvancedAdminDashboard from "./pages/AdvancedAdminDashboard";
+import SupplierProfile from "./pages/SupplierProfile";
+import SupplierDirectory from "./pages/SupplierDirectory";
+import SupplierPerformancePage from "./pages/SupplierPerformancePage";
+import Messages from "./pages/Messages";
+import RequestForQuote from "./pages/RequestForQuote";
+import QuoteRequests from "./pages/QuoteRequests";
+import OrderTracking from "./pages/OrderTracking";
+import SampleRequest from "./pages/SampleRequest";
 import AdminGuard from "./components/AdminGuard";
-import Navigation from "./components/Navigation";
+import Layout from "./components/Layout";
+import Login from "./pages/Login";
+import RequireAuth from "@/components/RequireAuth";
+import AdminUsers from "./pages/AdminUsers";
 
 const queryClient = new QueryClient();
 
@@ -27,14 +38,27 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-gradient-to-br from-amber-50 to-stone-100">
-            <Navigation />{" "}
+          <Layout>
             <Routes>
+              <Route path="/login" element={<Login />} />
               <Route path="/" element={<Home />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/collection" element={<Collection />} />
-              <Route path="/materials" element={<Materials />} />
-              <Route path="/analytics" element={<TextileAnalytics />} />
+              <Route element={<RequireAuth />}>
+                <Route path="/materials" element={<MaterialsMarketplace />} />
+                <Route path="/analytics" element={<TextileAnalytics />} />
+                <Route path="/suppliers" element={<SupplierDirectory />} />
+                <Route path="/suppliers/:id" element={<SupplierProfile />} />
+                <Route
+                  path="/suppliers/performance"
+                  element={<SupplierPerformancePage />}
+                />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/quotes" element={<QuoteRequests />} />
+                <Route path="/quotes/new" element={<RequestForQuote />} />
+                <Route path="/orders" element={<OrderTracking />} />
+                <Route path="/sample-request" element={<SampleRequest />} />
+              </Route>
               <Route
                 path="/admin"
                 element={
@@ -53,16 +77,39 @@ const App = () => (
               />
               <Route
                 path="/admin/dashboard"
-                element={<AdvancedAdminDashboard />}
+                element={
+                  <AdminGuard>
+                    <AdvancedAdminDashboard />
+                  </AdminGuard>
+                }
               />
-              <Route path="/admin/code-editor" element={<AdminCodeEditor />} />
+              <Route
+                path="/admin/code-editor"
+                element={
+                  <AdminGuard>
+                    <AdminCodeEditor />
+                  </AdminGuard>
+                }
+              />
               <Route
                 path="/admin/data-management"
-                element={<AdminDataManagement />}
+                element={
+                  <AdminGuard>
+                    <AdminDataManagement />
+                  </AdminGuard>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminGuard>
+                    <AdminUsers />
+                  </AdminGuard>
+                }
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </div>
+          </Layout>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

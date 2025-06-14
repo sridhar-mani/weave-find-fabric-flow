@@ -40,3 +40,19 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Fixed chart overflow issues */
+.chart-container {
+  overflow: hidden !important;
+  max-width: 100% !important;
+}
+
+.chart-container .recharts-responsive-container {
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.chart-container .recharts-wrapper {
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
