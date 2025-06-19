@@ -17,6 +17,34 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5000000, // 5MB limit
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.supabase\.io\/rest\/v1\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 30 // 30 minutes
+              }
+            }
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              }
+            }
+          }
+        ]
+      },
       manifest: {
         name: 'Weave - Modern Textile Sourcing',
         short_name: 'Weave',
@@ -60,33 +88,6 @@ export default defineConfig(({ mode }) => ({
             description: 'View saved fabrics and materials',
             url: '/collection',
             icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
-          }
-        ]
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.supabase\.io\/rest\/v1\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-api',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 30 // 30 minutes
-              }
-            }
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images',
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
           }
         ]
       }

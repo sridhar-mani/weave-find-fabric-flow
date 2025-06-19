@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Footer from "./Footer";
@@ -9,6 +10,20 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  if (isHomePage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50/20 flex flex-col w-full">
+        <main className="flex-1 p-4 lg:p-6">
+          {children}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50/20 flex w-full">
@@ -19,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <SidebarTrigger className="h-8 w-8" />
           </div>
           
-          <main className="flex-1 p-4 lg:p-6">
+          <main className="flex-1 p-3 lg:p-4">
             {children}
           </main>
           <Footer />
