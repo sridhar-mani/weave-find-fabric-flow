@@ -2,34 +2,48 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { FabricType } from '@/data/fabricData';
 
 interface FabricCardProps {
   fabric: FabricType;
   onClick: () => void;
+  onAddToCollection?: () => void;
 }
 
-const FabricCard = ({ fabric, onClick }: FabricCardProps) => {
+const FabricCard = ({ fabric, onClick, onAddToCollection }: FabricCardProps) => {
   return (
     <motion.div
       whileHover={{ scale: 1.02, rotate: 1 }}
       whileTap={{ scale: 0.98 }}
       className="cursor-pointer"
-      onClick={onClick}
     >
       <Card className="bg-white/60 backdrop-blur-sm border-stone-200 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
         <CardContent className="p-0">
           {/* Image Placeholder */}
-          <div className="aspect-square bg-gradient-to-br from-stone-200 to-stone-300 relative overflow-hidden">
+          <div className="aspect-square bg-gradient-to-br from-stone-200 to-stone-300 relative overflow-hidden" onClick={onClick}>
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-amber-100/20 to-stone-200/20"
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.3 }}
             />
+            {onAddToCollection && (
+              <Button
+                size="sm"
+                className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/90 hover:bg-white text-stone-700 hover:text-stone-900"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToCollection();
+                }}
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            )}
           </div>
           
           {/* Content */}
-          <div className="p-4">
+          <div className="p-4" onClick={onClick}>
             <div className="flex items-start justify-between mb-2">
               <h3 className="font-semibold text-stone-800 text-sm line-clamp-1">
                 {fabric.name}
