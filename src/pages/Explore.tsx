@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import FacetSidebar from '@/components/FacetSidebar';
 import FabricCard from '@/components/FabricCard';
@@ -45,7 +45,7 @@ const Explore: React.FC = () => {
     construction: filters.construction,
     gsmRange: filters.gsm,
     finishes: filters.finishes,
-    category: filters.categories[0] // Pass the first category as a string
+    category: filters.categories[0]
   });
 
   const { logFabricView } = useAnalytics();
@@ -66,7 +66,6 @@ const Explore: React.FC = () => {
   };
 
   const handleAddToCollection = (fabric: any) => {
-    // Convert FabricSearchResult to FabricType
     const fabricForCollection: FabricType = {
       id: fabric.id,
       name: fabric.name,
@@ -78,9 +77,9 @@ const Explore: React.FC = () => {
       image: fabric.image,
       certifications: fabric.certifications,
       sustainability: fabric.sustainability,
-      description: fabric.name, // Use name as fallback for description
-      weight: `${fabric.gsm || 0}gsm`, // Convert gsm to weight string
-      blend: fabric.composition // Use composition as blend
+      description: fabric.name,
+      weight: `${fabric.gsm || 0}gsm`,
+      blend: fabric.composition
     };
 
     addItem({
@@ -95,37 +94,42 @@ const Explore: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-stone-800 mb-2">Search Error</h2>
-          <p className="text-stone-600">Failed to load fabrics. Please try again.</p>
-          <Button onClick={() => window.location.reload()} className="mt-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 to-amber-50">
+        <motion.div 
+          className="text-center bg-white p-8 rounded-xl shadow-lg border border-stone-200"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <h2 className="text-2xl font-bold text-stone-800 mb-4">Search Error</h2>
+          <p className="text-stone-600 mb-6">Failed to load fabrics. Please try again.</p>
+          <Button onClick={() => window.location.reload()} className="bg-amber-500 hover:bg-amber-600">
             Retry
           </Button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Search Header */}
-      <div className="bg-white border-b border-stone-200 sticky top-0 z-20">
-        <div className="container mx-auto px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30">
+      {/* Enhanced Search Header */}
+      <div className="bg-white/80 backdrop-blur-md border-b border-stone-200/60 sticky top-0 z-20 shadow-sm">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-2xl">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
+            <div className="relative flex-1 max-w-3xl">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
               <Input
-                placeholder="Search fabrics, materials, suppliers..."
+                placeholder="Search premium fabrics, materials, suppliers..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 pr-4 py-3 text-lg"
+                className="pl-12 pr-4 py-4 text-lg border-stone-200 focus:border-amber-400 focus:ring-amber-400/20 bg-white/90 backdrop-blur-sm shadow-sm"
               />
+              <Sparkles className="absolute right-4 top-1/2 transform -translate-y-1/2 text-amber-400 w-5 h-5" />
             </div>
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden"
+              className="lg:hidden border-stone-200 hover:bg-stone-50"
             >
               <SlidersHorizontal className="w-4 h-4 mr-2" />
               Filters
@@ -134,9 +138,9 @@ const Explore: React.FC = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex gap-8">
-          {/* Filters Sidebar */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex gap-6">
+          {/* Enhanced Filters Sidebar */}
           <div className={`lg:block ${showFilters ? 'block' : 'hidden'} lg:w-80 flex-shrink-0`}>
             <FacetSidebar
               filters={filters}
@@ -144,42 +148,56 @@ const Explore: React.FC = () => {
             />
           </div>
 
-          {/* Results */}
+          {/* Enhanced Results */}
           <div className="flex-1">
             {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
+            <motion.div 
+              className="flex items-center justify-between mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <div>
-                <h1 className="text-2xl font-bold text-stone-800">
-                  {searchQuery ? `Search results for "${searchQuery}"` : 'Explore Fabrics'}
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
+                  {searchQuery ? `Search results for "${searchQuery}"` : 'Explore Premium Fabrics'}
                 </h1>
-                <p className="text-stone-600 mt-1">
-                  {isLoading ? 'Searching...' : `${fabrics?.length || 0} fabrics found`}
+                <p className="text-stone-600 mt-2 text-lg">
+                  {isLoading ? 'Searching our premium collection...' : `${fabrics?.length || 0} high-quality fabrics found`}
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Loading State */}
+            {/* Enhanced Loading State */}
             {isLoading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="bg-stone-200 aspect-square rounded-lg mb-4"></div>
-                    <div className="bg-stone-200 h-4 rounded mb-2"></div>
-                    <div className="bg-stone-200 h-4 rounded w-2/3"></div>
-                  </div>
+                  <motion.div 
+                    key={i} 
+                    className="animate-pulse"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <div className="bg-gradient-to-br from-stone-200 to-stone-300 aspect-square rounded-xl mb-4"></div>
+                    <div className="bg-stone-200 h-6 rounded-lg mb-3"></div>
+                    <div className="bg-stone-200 h-4 rounded-lg w-2/3"></div>
+                  </motion.div>
                 ))}
               </div>
             )}
 
-            {/* Empty State */}
+            {/* Enhanced Empty State */}
             {!isLoading && fabrics?.length === 0 && (
-              <div className="text-center py-16">
-                <div className="w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-12 h-12 text-stone-400" />
+              <motion.div 
+                className="text-center py-20"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <div className="w-32 h-32 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-16 h-16 text-amber-500" />
                 </div>
-                <h3 className="text-xl font-semibold text-stone-800 mb-2">No fabrics found</h3>
-                <p className="text-stone-600 mb-6">
-                  Try adjusting your search terms or filters to find what you're looking for.
+                <h3 className="text-2xl font-bold text-stone-800 mb-3">No fabrics found</h3>
+                <p className="text-stone-600 mb-8 text-lg max-w-md mx-auto">
+                  Try adjusting your search terms or filters to discover the perfect materials for your project.
                 </p>
                 <Button
                   variant="outline"
@@ -192,26 +210,27 @@ const Explore: React.FC = () => {
                       categories: []
                     });
                   }}
+                  className="border-amber-200 text-amber-600 hover:bg-amber-50"
                 >
                   Clear all filters
                 </Button>
-              </div>
+              </motion.div>
             )}
 
-            {/* Results Grid */}
+            {/* Enhanced Results Grid */}
             {!isLoading && fabrics && fabrics.length > 0 && (
               <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.4 }}
               >
                 {fabrics.map((fabric, index) => (
                   <motion.div
                     key={fabric.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
                     <FabricCard
                       fabric={{
@@ -240,7 +259,6 @@ const Explore: React.FC = () => {
         </div>
       </div>
 
-      {/* Pack Drawer */}
       <PackDrawer
         fabricId={selectedFabric}
         isOpen={!!selectedFabric}
