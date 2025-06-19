@@ -16,7 +16,6 @@ interface FabricType {
   id: string;
   name: string;
   category: string;
-  width: string;
   composition: string;
   finish: string;
   price: number;
@@ -46,7 +45,7 @@ const Explore: React.FC = () => {
     construction: filters.construction,
     gsmRange: filters.gsm,
     finishes: filters.finishes,
-    category: filters.categories
+    category: filters.categories[0] // Pass the first category as a string
   });
 
   const { logFabricView } = useAnalytics();
@@ -72,7 +71,6 @@ const Explore: React.FC = () => {
       id: fabric.id,
       name: fabric.name,
       category: fabric.category,
-      width: fabric.width,
       composition: fabric.composition,
       finish: fabric.finish,
       price: fabric.price,
@@ -220,7 +218,6 @@ const Explore: React.FC = () => {
                         id: fabric.id,
                         name: fabric.name,
                         category: fabric.category,
-                        width: fabric.width,
                         composition: fabric.composition,
                         finish: fabric.finish,
                         price: fabric.price,
