@@ -1,117 +1,113 @@
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { useAnalytics } from './useAnalytics';
 
-interface Fabric {
+interface SearchFilters {
+  query?: string;
+  category?: string;
+  construction?: string[];
+  gsmRange?: [number, number];
+  finishes?: string[];
+  certifications?: string[];
+  priceRange?: [number, number];
+}
+
+interface FabricSearchResult {
   id: string;
-  code: string;
   name: string;
+  category: string;
   construction: string;
   gsm: number;
-  width_cm: number;
-  min_order_m: number;
-  base_price: number;
-  finishes: string[];
+  width: string;
+  composition: string;
+  finish: string;
+  price: number;
+  supplier: string;
+  image?: string;
+  certifications: string[];
+  sustainability: string[];
 }
 
-export function useFabricSearch() {
-  const [fabrics, setFabrics] = useState<Fabric[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { trackEvent } = useAnalytics();
+export const useFabricSearch = (filters: SearchFilters) => {
+  const [debouncedQuery, setDebouncedQuery] = useState(filters.query || '');
 
-  const searchFabrics = async (
-    query?: string,
-    construction?: string,
-    minGsm: number = 0,
-    maxGsm: number = 2000
-  ) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(filters.query || '');
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filters.query]);
+
+  const searchFabrics = async (): Promise<FabricSearchResult[]> => {
     if (!isSupabaseConfigured) {
-      console.log('Search request (Supabase not configured):', { query, construction, minGsm, maxGsm })
-      setError('Supabase not configured. Please set up your environment variables.')
-      return
-    }
+      // Return mock data when Supabase is not configured
+      const mockFabrics: FabricSearchResult[] = [
+        {
+          id: 'f1',
+          name: 'Organic Cotton Twill',
+          category: 'Cotton',
+          construction: 'Twill',
+          gsm: 280,
+          width: '150cm',
+          composition: '100% Organic Cotton',
+          finish: 'Enzyme Washed',
+          price: 12.50,
+          supplier: 'EcoTextiles Ltd',
+          certifications: ['GOTS', 'OEKO-TEX'],
+          sustainability: ['Organic', 'Fair Trade']
+        },
+        {
+          id: 'f2',
+          name: 'Linen Canvas',
+          category: 'Linen',
+          construction: 'Plain',
+          gsm: 320,
+          width: '140cm',
+          composition: '100% Linen',
+          finish: 'Stone Washed',
+          price: 18.75,
+          supplier: 'Natural Fibers Co',
+          certifications: ['OEKO-TEX'],
+          sustainability: ['Biodegradable']
+        }
+      ];
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase.rpc('search_fabrics', {
-        p_query: query || null,
-        p_construction: construction || null,
-        p_min_gsm: minGsm,
-        p_max_gsm: maxGsm
+      // Apply filters to mock data
+      return mockFabrics.filter(fabric => {
+        if (debouncedQuery && !fabric.name.toLowerCase().includes(debouncedQuery.toLowerCase())) {
+          return false;
+        }
+        if (filters.category && fabric.category !== filters.category) {
+          return false;
+        }
+        if (filters.gsmRange && (fabric.gsm < filters.gsmRange[0] || fabric.gsm > filters.gsmRange[1])) {
+          return false;
+        }
+        return true;
       });
-
-      if (error) throw error;
-      
-      setFabrics(data || []);
-      
-      // Track search event
-      await trackEvent('fabric_search', {
-        query,
-        construction,
-        minGsm,
-        maxGsm,
-        results_count: data?.length || 0
-      });
-    } catch (err: any) {
-      setError(err.message);
-      console.error('Search error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getFabricByCode = async (code: string) => {
-    if (!isSupabaseConfigured) {
-      console.log('Fabric fetch request (Supabase not configured):', code)
-      setError('Supabase not configured. Please set up your environment variables.')
-      return null
     }
 
-    setLoading(true);
-    setError(null);
+    const { data, error } = await supabase.rpc('search_fabrics', {
+      search_query: debouncedQuery,
+      filter_category: filters.category,
+      filter_construction: filters.construction,
+      gsm_min: filters.gsmRange?.[0],
+      gsm_max: filters.gsmRange?.[1],
+      filter_finishes: filters.finishes,
+      filter_certifications: filters.certifications,
+      price_min: filters.priceRange?.[0],
+      price_max: filters.priceRange?.[1]
+    });
 
-    try {
-      const { data, error } = await supabase
-        .from('fabric')
-        .select(`
-          *,
-          variants:variant(*),
-          fabric_trims:fabric_trim(
-            recommended,
-            trim:trim(*)
-          ),
-          fabric_certs:fabric_cert(
-            cert:cert(*)
-          ),
-          price_breaks:price_break(*)
-        `)
-        .eq('code', code)
-        .single();
-
-      if (error) throw error;
-      
-      // Track fabric view
-      await trackEvent('fabric_view', { code });
-      
-      return data;
-    } catch (err: any) {
-      setError(err.message);
-      console.error('Fabric fetch error:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
+    if (error) throw error;
+    return data || [];
   };
 
-  return {
-    fabrics,
-    loading,
-    error,
-    searchFabrics,
-    getFabricByCode
-  };
-}
+  return useQuery({
+    queryKey: ['fabrics', debouncedQuery, filters],
+    queryFn: searchFabrics,
+    enabled: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
