@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 
 interface FacetSidebarProps {
   filters: {
-    construction: string;
+    construction: string[];
     gsm: [number, number];
     finishes: string[];
     categories: string[];
@@ -25,15 +25,15 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
   };
 
   const toggleCategory = (category: string) => {
-    const newCategories = filters.categories.includes(category)
+    const newCategories = filters.categories?.includes(category)
       ? filters.categories.filter(c => c !== category)
-      : [...filters.categories, category];
+      : [...(filters.categories || []), category];
     updateFilters('categories', newCategories);
   };
 
   return (
     <motion.div 
-      className="w-80 bg-white/60 backdrop-blur-sm border-r border-stone-200 p-6 overflow-y-auto"
+      className="w-80 bg-white/60 backdrop-blur-sm border-r border-stone-200 p-6 overflow-y-auto sticky top-24"
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -48,7 +48,7 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
             <div key={category} className="flex items-center space-x-2">
               <Checkbox
                 id={category}
-                checked={filters.categories.includes(category)}
+                checked={filters.categories?.includes(category) || false}
                 onCheckedChange={() => toggleCategory(category)}
               />
               <Label htmlFor={category} className="text-sm text-stone-600">
@@ -83,7 +83,7 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
         <h3 className="text-sm font-medium text-stone-700 mb-4">Finishes</h3>
         <ToggleGroup 
           type="multiple" 
-          value={filters.finishes}
+          value={filters.finishes || []}
           onValueChange={(value) => updateFilters('finishes', value)}
           className="flex-wrap gap-2"
         >

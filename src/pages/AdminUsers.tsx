@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -19,7 +20,7 @@ const AdminUsers: React.FC = () => {
     const loadUsers = async () => {
       // Note: supabase anon key cannot list auth users. Replace with proper API or table.
       const { data, error } = await supabase
-        .from<AuthUser>('users')
+        .from('users')
         .select('id, email, created_at');
       if (error) {
         console.error('Error fetching users:', error.message);

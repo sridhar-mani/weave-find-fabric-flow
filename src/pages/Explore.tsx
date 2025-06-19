@@ -16,7 +16,6 @@ interface FabricType {
   id: string;
   name: string;
   category: string;
-  construction: string;
   gsm: number;
   width: string;
   composition: string;
@@ -37,7 +36,7 @@ const Explore: React.FC = () => {
   const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    construction: '',
+    construction: [] as string[],
     gsm: [50, 500] as [number, number],
     finishes: [] as string[],
     categories: [] as string[]
@@ -45,7 +44,10 @@ const Explore: React.FC = () => {
 
   const { data: fabrics, isLoading, error } = useFabricSearch({
     query: searchQuery,
-    ...filters
+    construction: filters.construction,
+    gsmRange: filters.gsm,
+    finishes: filters.finishes,
+    categories: filters.categories
   });
 
   const { logFabricView } = useAnalytics();
@@ -71,7 +73,6 @@ const Explore: React.FC = () => {
       id: fabric.id,
       name: fabric.name,
       category: fabric.category,
-      construction: fabric.construction,
       gsm: fabric.gsm,
       width: fabric.width,
       composition: fabric.composition,
@@ -144,7 +145,6 @@ const Explore: React.FC = () => {
             <FacetSidebar
               filters={filters}
               onFiltersChange={setFilters}
-              className="sticky top-24"
             />
           </div>
 
@@ -190,7 +190,7 @@ const Explore: React.FC = () => {
                   onClick={() => {
                     setSearchQuery('');
                     setFilters({
-                      construction: '',
+                      construction: [],
                       gsm: [50, 500],
                       finishes: [],
                       categories: []
@@ -222,7 +222,6 @@ const Explore: React.FC = () => {
                         id: fabric.id,
                         name: fabric.name,
                         category: fabric.category,
-                        construction: fabric.construction,
                         gsm: fabric.gsm,
                         width: fabric.width,
                         composition: fabric.composition,
