@@ -116,6 +116,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
             {material.subcategory ? `› ${material.subcategory}` : ""}
           </DialogDescription>
         </DialogHeader>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           {/* Image/Placeholder */}
           <div className="bg-gradient-to-br from-slate-100 to-slate-200 aspect-square rounded-lg flex items-center justify-center relative">
@@ -261,8 +262,10 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
               </div>
             </div>
           </div>
-        </div>{" "}
+        </div>
+
         <Separator className="my-4" />
+        
         <Tabs defaultValue="details">
           <TabsList className="grid grid-cols-5 mb-4">
             <TabsTrigger value="details" className="text-sm">
@@ -281,6 +284,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
               Quality Assurance
             </TabsTrigger>
           </TabsList>
+          
           <TabsContent value="details" className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-slate-700 mb-2 flex items-center">
@@ -316,6 +320,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
               </p>
             </div>
           </TabsContent>
+          
           <TabsContent value="certifications">
             <div className="space-y-4">
               {material.certifications.length > 0 ? (
@@ -363,6 +368,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
               )}
             </div>
           </TabsContent>
+          
           <TabsContent value="applications">
             {material.applications.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -377,7 +383,8 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
                 No specific applications provided
               </p>
             )}
-          </TabsContent>{" "}
+          </TabsContent>
+          
           <TabsContent value="care">
             {material.careInstructions ? (
               <div className="p-4 bg-slate-50 rounded-md">
@@ -394,6 +401,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
               </p>
             )}
           </TabsContent>
+          
           <TabsContent value="quality">
             {/* Mock certification data for demonstration */}
             <FabricCertification
@@ -406,7 +414,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
                   issuer: "OEKO-TEX Association",
                   issuedDate: "2023-04-15",
                   expiryDate: "2024-04-15",
-                  status: "valid",
+                  status: "active",
                   documentUrl: "#",
                   iconUrl: "",
                   description: "Tested for harmful substances",
@@ -417,7 +425,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
                   issuer: "Control Union",
                   issuedDate: "2023-02-10",
                   expiryDate: "2024-02-10",
-                  status: "valid",
+                  status: "active",
                   documentUrl: "#",
                   iconUrl: "",
                   description: "Certified organic textile",
@@ -452,6 +460,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
             />
           </TabsContent>
         </Tabs>
+        
         <DialogFooter className="mt-6 flex flex-col sm:flex-row gap-2">
           <Button
             variant="outline"
@@ -477,6 +486,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
             Request Quote
           </Button>
         </DialogFooter>
+        
         {/* Sample Request Form Dialog */}
         <Dialog
           open={isSampleRequestOpen}
@@ -484,13 +494,20 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({
           modal
         >
           <SampleRequestForm
-            materialId={material.id}
-            materialName={material.name}
-            onRequestSuccess={() => {
+            material={{
+              id: material.id || '',
+              name: material.name,
+              supplier: {
+                id: 'supplier-1',
+                name: material.supplier,
+                location: material.supplierLocation
+              }
+            }}
+            onSubmit={(data) => {
               setSampleRequestOpen(false);
               onSampleRequest?.(material.id || "");
             }}
-            onRequestClose={() => setSampleRequestOpen(false)}
+            onCancel={() => setSampleRequestOpen(false)}
           />
         </Dialog>
       </DialogContent>

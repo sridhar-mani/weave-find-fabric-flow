@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from "react";
-import Peer from "peerjs";
+import Peer, { DataConnection } from "peerjs";
 
 interface WebRTCChatProps {
   peerId: string;
@@ -9,7 +10,7 @@ interface WebRTCChatProps {
 const WebRTCChat: React.FC<WebRTCChatProps> = ({ peerId, targetPeerId }) => {
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState("");
-  const connectionRef = useRef<Peer.DataConnection | null>(null);
+  const connectionRef = useRef<DataConnection | null>(null);
 
   useEffect(() => {
     const peer = new Peer(peerId);

@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
-  DialogContent,
+  DialogContent as DialogContentComponent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -115,7 +116,7 @@ const SampleRequestForm: React.FC<SampleRequestFormProps> = ({
       setFormData({
         ...formData,
         [parent]: {
-          ...formData[parent as keyof SampleRequestData],
+          ...(formData[parent as keyof SampleRequestData] as any),
           [child]: value,
         },
       });
@@ -174,8 +175,8 @@ const SampleRequestForm: React.FC<SampleRequestFormProps> = ({
     });
   };
 
-  const DialogContent = (
-    <DialogContent className="max-w-md md:max-w-2xl">
+  const renderDialogContent = () => (
+    <DialogContentComponent className="max-w-md md:max-w-2xl">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Scissors className="w-5 h-5" />
@@ -525,16 +526,16 @@ const SampleRequestForm: React.FC<SampleRequestFormProps> = ({
           </Button>
         </DialogFooter>
       </form>
-    </DialogContent>
+    </DialogContentComponent>
   );
 
   return trigger ? (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      {DialogContent}
+      {renderDialogContent()}
     </Dialog>
   ) : (
-    DialogContent
+    renderDialogContent()
   );
 };
 

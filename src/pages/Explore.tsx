@@ -12,18 +12,35 @@ import { useFabricSearch } from '@/hooks/useFabricSearch';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useCollection } from '@/hooks/useCollection';
 
+interface FabricType {
+  id: string;
+  name: string;
+  category: string;
+  construction: string;
+  gsm: number;
+  width: string;
+  composition: string;
+  finish: string;
+  price: number;
+  supplier: string;
+  image?: string;
+  certifications: string[];
+  sustainability: string[];
+  description: string;
+  weight: string;
+  blend: string;
+}
+
 const Explore: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    category: '',
-    construction: [] as string[],
-    gsmRange: [50, 500] as [number, number],
+    construction: '',
+    gsm: [50, 500] as [number, number],
     finishes: [] as string[],
-    certifications: [] as string[],
-    priceRange: [0, 100] as [number, number]
+    categories: [] as string[]
   });
 
   const { data: fabrics, isLoading, error } = useFabricSearch({
@@ -49,13 +66,33 @@ const Explore: React.FC = () => {
   };
 
   const handleAddToCollection = (fabric: any) => {
-    addItem({
+    // Convert FabricSearchResult to FabricType
+    const fabricForCollection: FabricType = {
       id: fabric.id,
       name: fabric.name,
-      type: 'fabric',
-      image: fabric.image,
+      category: fabric.category,
+      construction: fabric.construction,
+      gsm: fabric.gsm,
+      width: fabric.width,
+      composition: fabric.composition,
+      finish: fabric.finish,
+      price: fabric.price,
       supplier: fabric.supplier,
-      price: fabric.price
+      image: fabric.image,
+      certifications: fabric.certifications,
+      sustainability: fabric.sustainability,
+      description: fabric.name, // Use name as fallback for description
+      weight: `${fabric.gsm}gsm`, // Convert gsm to weight string
+      blend: fabric.composition // Use composition as blend
+    };
+
+    addItem({
+      id: fabricForCollection.id,
+      name: fabricForCollection.name,
+      type: 'fabric',
+      image: fabricForCollection.image,
+      supplier: fabricForCollection.supplier,
+      price: fabricForCollection.price
     });
   };
 
@@ -153,12 +190,10 @@ const Explore: React.FC = () => {
                   onClick={() => {
                     setSearchQuery('');
                     setFilters({
-                      category: '',
-                      construction: [],
-                      gsmRange: [50, 500],
+                      construction: '',
+                      gsm: [50, 500],
                       finishes: [],
-                      certifications: [],
-                      priceRange: [0, 100]
+                      categories: []
                     });
                   }}
                 >
@@ -183,7 +218,24 @@ const Explore: React.FC = () => {
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                   >
                     <FabricCard
-                      fabric={fabric}
+                      fabric={{
+                        id: fabric.id,
+                        name: fabric.name,
+                        category: fabric.category,
+                        construction: fabric.construction,
+                        gsm: fabric.gsm,
+                        width: fabric.width,
+                        composition: fabric.composition,
+                        finish: fabric.finish,
+                        price: fabric.price,
+                        supplier: fabric.supplier,
+                        image: fabric.image,
+                        certifications: fabric.certifications,
+                        sustainability: fabric.sustainability,
+                        description: fabric.name,
+                        weight: `${fabric.gsm}gsm`,
+                        blend: fabric.composition
+                      }}
                       onClick={() => handleFabricClick(fabric.id)}
                       onAddToCollection={() => handleAddToCollection(fabric)}
                     />
@@ -198,7 +250,7 @@ const Explore: React.FC = () => {
       {/* Pack Drawer */}
       <PackDrawer
         fabricId={selectedFabric}
-        open={!!selectedFabric}
+        isOpen={!!selectedFabric}
         onClose={() => setSelectedFabric(null)}
       />
     </div>

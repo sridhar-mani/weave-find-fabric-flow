@@ -34,6 +34,7 @@ import {
   CheckCircle,
   Download,
   CircleDashed,
+  MessageSquare,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import PageHeader from "@/components/PageHeader";
