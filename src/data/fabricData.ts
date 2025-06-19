@@ -23,6 +23,12 @@ export interface FabricType {
   image: string;
   weight: string;
   blend: string;
+  composition: string;
+  finish: string;
+  price: number;
+  supplier: string;
+  certifications: string[];
+  sustainability: string[];
 }
 
 export interface FabricData {
@@ -40,6 +46,12 @@ export const fabricTypes: FabricType[] = [
       "https://images.unsplash.com/photo-1506629905607-0bb3ef005ac5?w=800&h=600&fit=crop",
     weight: "140-200 GSM",
     blend: "100% Cotton",
+    composition: "100% Cotton",
+    finish: "Standard",
+    price: 12.50,
+    supplier: "Cotton Mills International",
+    certifications: ["OEKO-TEX"],
+    sustainability: ["Organic"]
   },
   {
     id: "silk",
@@ -51,6 +63,12 @@ export const fabricTypes: FabricType[] = [
       "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&h=600&fit=crop",
     weight: "80-120 GSM",
     blend: "100% Silk",
+    composition: "100% Silk",
+    finish: "Degummed",
+    price: 45.00,
+    supplier: "Premium Silk Traders",
+    certifications: ["OEKO-TEX"],
+    sustainability: ["Biodegradable"]
   },
   {
     id: "linen",
@@ -62,6 +80,12 @@ export const fabricTypes: FabricType[] = [
       "https://images.unsplash.com/photo-1486718448742-163732cd1544?w=800&h=600&fit=crop",
     weight: "120-180 GSM",
     blend: "100% Linen",
+    composition: "100% Linen",
+    finish: "Stone Washed",
+    price: 18.75,
+    supplier: "European Linen Mills",
+    certifications: ["OEKO-TEX"],
+    sustainability: ["Biodegradable", "Sustainable"]
   },
   {
     id: "polyester",
@@ -73,6 +97,12 @@ export const fabricTypes: FabricType[] = [
       "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=600&fit=crop",
     weight: "100-300 GSM",
     blend: "100% Polyester",
+    composition: "100% Polyester",
+    finish: "Standard",
+    price: 8.50,
+    supplier: "Synthetic Solutions Inc",
+    certifications: ["OEKO-TEX"],
+    sustainability: ["Recyclable"]
   },
 ];
 
