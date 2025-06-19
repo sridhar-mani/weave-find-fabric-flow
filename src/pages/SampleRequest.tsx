@@ -128,7 +128,6 @@ const SampleRequest: React.FC = () => {
         <PageHeader 
           title="Sample Requests" 
           description="Track and manage your material sample requests"
-          icon={<Package className="w-8 h-8" />}
         />
 
         {/* Stats Cards */}

@@ -16,7 +16,6 @@ interface FabricType {
   id: string;
   name: string;
   category: string;
-  gsm: number;
   width: string;
   composition: string;
   finish: string;
@@ -47,7 +46,7 @@ const Explore: React.FC = () => {
     construction: filters.construction,
     gsmRange: filters.gsm,
     finishes: filters.finishes,
-    categories: filters.categories
+    category: filters.categories
   });
 
   const { logFabricView } = useAnalytics();
@@ -73,7 +72,6 @@ const Explore: React.FC = () => {
       id: fabric.id,
       name: fabric.name,
       category: fabric.category,
-      gsm: fabric.gsm,
       width: fabric.width,
       composition: fabric.composition,
       finish: fabric.finish,
@@ -83,7 +81,7 @@ const Explore: React.FC = () => {
       certifications: fabric.certifications,
       sustainability: fabric.sustainability,
       description: fabric.name, // Use name as fallback for description
-      weight: `${fabric.gsm}gsm`, // Convert gsm to weight string
+      weight: `${fabric.gsm || 0}gsm`, // Convert gsm to weight string
       blend: fabric.composition // Use composition as blend
     };
 
@@ -222,7 +220,6 @@ const Explore: React.FC = () => {
                         id: fabric.id,
                         name: fabric.name,
                         category: fabric.category,
-                        gsm: fabric.gsm,
                         width: fabric.width,
                         composition: fabric.composition,
                         finish: fabric.finish,
@@ -232,7 +229,7 @@ const Explore: React.FC = () => {
                         certifications: fabric.certifications,
                         sustainability: fabric.sustainability,
                         description: fabric.name,
-                        weight: `${fabric.gsm}gsm`,
+                        weight: `${fabric.gsm || 0}gsm`,
                         blend: fabric.composition
                       }}
                       onClick={() => handleFabricClick(fabric.id)}
