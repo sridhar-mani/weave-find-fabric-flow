@@ -1,156 +1,153 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
 
-interface CollectionItem {
+export interface CollectionItem {
   id: string;
   name: string;
-  type: 'fabric' | 'trim';
   image?: string;
-  supplier: string;
-  price: number;
-  addedAt: string;
+  price?: number;
+  supplier?: string;
+  material?: string;
+  addedAt: Date;
 }
 
-export const useCollection = () => {
+export function useCollection() {
   const [items, setItems] = useState<CollectionItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { toast } = useToast();
 
-  const STORAGE_KEY = 'collection';
-
-  // Load collection on mount
   useEffect(() => {
-    loadCollection();
-  }, [user]);
-
-  const loadCollection = async () => {
-    setIsLoading(true);
-    try {
-      // Always load from localStorage first
-      const localItems = localStorage.getItem(STORAGE_KEY);
-      if (localItems) {
-        setItems(JSON.parse(localItems));
+    const loadCollection = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
       }
 
-      // If user is logged in and Supabase is configured, sync with server
-      if (user && isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('collection')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
+      try {
+        // Try to load from favorites table
+        const { data: favorites, error } = await supabase
+          .from('favorites')
+          .select(`
+            id,
+            fabric_id,
+            created_at,
+            fabrics!inner (
+              id,
+              name,
+              image_url,
+              price_per_yard,
+              supplier,
+              material
+            )
+          `)
+          .eq('user_id', user.id);
 
         if (error) {
           console.error('Error loading collection from server:', error);
-        } else if (data) {
-          const serverItems = data.map(item => ({
-            id: item.fabric_id,
-            name: item.fabric_name,
-            type: item.fabric_type,
-            image: item.fabric_image,
-            supplier: item.supplier_name,
-            price: item.price,
-            addedAt: item.created_at
+          // Load from localStorage as fallback
+          const savedCollection = localStorage.getItem(`collection_${user.id}`);
+          if (savedCollection) {
+            const parsed = JSON.parse(savedCollection);
+            setItems(parsed.map((item: any) => ({
+              ...item,
+              addedAt: new Date(item.addedAt)
+            })));
+          }
+        } else if (favorites) {
+          // Transform favorites data to collection items
+          const collectionItems: CollectionItem[] = favorites.map(fav => ({
+            id: fav.fabric_id || fav.id,
+            name: fav.fabrics?.name || 'Unknown Item',
+            image: fav.fabrics?.image_url,
+            price: fav.fabrics?.price_per_yard,
+            supplier: fav.fabrics?.supplier,
+            material: fav.fabrics?.material,
+            addedAt: new Date(fav.created_at)
           }));
-          setItems(serverItems);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(serverItems));
+          setItems(collectionItems);
         }
+      } catch (error) {
+        console.error('Error loading collection:', error);
+        // Load from localStorage as fallback
+        const savedCollection = localStorage.getItem(`collection_${user?.id}`);
+        if (savedCollection) {
+          try {
+            const parsed = JSON.parse(savedCollection);
+            setItems(parsed.map((item: any) => ({
+              ...item,
+              addedAt: new Date(item.addedAt)
+            })));
+          } catch (parseError) {
+            console.error('Error parsing saved collection:', parseError);
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading collection:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    loadCollection();
+  }, [user]);
 
   const addItem = async (item: Omit<CollectionItem, 'addedAt'>) => {
     const newItem: CollectionItem = {
       ...item,
-      addedAt: new Date().toISOString()
+      addedAt: new Date()
     };
 
-    const updatedItems = [newItem, ...items.filter(i => i.id !== item.id)];
-    setItems(updatedItems);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedItems));
+    setItems(prev => [newItem, ...prev]);
 
-    // Sync to server if logged in
-    if (user && isSupabaseConfigured) {
+    // Save to both database and localStorage
+    if (user) {
       try {
-        await supabase.from('collection').upsert({
-          user_id: user.id,
-          fabric_id: item.id,
-          fabric_name: item.name,
-          fabric_type: item.type,
-          fabric_image: item.image,
-          supplier_name: item.supplier,
-          price: item.price
-        });
+        await supabase
+          .from('favorites')
+          .insert({
+            user_id: user.id,
+            fabric_id: item.id
+          });
       } catch (error) {
-        console.error('Error syncing to server:', error);
+        console.error('Error saving to database:', error);
       }
-    }
 
-    toast({
-      title: 'Added to Collection',
-      description: `${item.name} has been added to your collection.`
-    });
+      // Always save to localStorage as backup
+      const updatedItems = [newItem, ...items];
+      localStorage.setItem(`collection_${user.id}`, JSON.stringify(updatedItems));
+    }
   };
 
   const removeItem = async (itemId: string) => {
-    const updatedItems = items.filter(item => item.id !== itemId);
-    setItems(updatedItems);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedItems));
+    setItems(prev => prev.filter(item => item.id !== itemId));
 
-    // Remove from server if logged in
-    if (user && isSupabaseConfigured) {
+    if (user) {
       try {
         await supabase
-          .from('collection')
+          .from('favorites')
           .delete()
           .eq('user_id', user.id)
           .eq('fabric_id', itemId);
       } catch (error) {
-        console.error('Error removing from server:', error);
+        console.error('Error removing from database:', error);
       }
-    }
 
-    toast({
-      title: 'Removed from Collection',
-      description: 'Item has been removed from your collection.'
-    });
+      // Update localStorage
+      const updatedItems = items.filter(item => item.id !== itemId);
+      localStorage.setItem(`collection_${user.id}`, JSON.stringify(updatedItems));
+    }
   };
 
-  const clearCollection = async () => {
-    setItems([]);
-    localStorage.removeItem(STORAGE_KEY);
-
-    if (user && isSupabaseConfigured) {
-      try {
-        await supabase
-          .from('collection')
-          .delete()
-          .eq('user_id', user.id);
-      } catch (error) {
-        console.error('Error clearing server collection:', error);
-      }
-    }
-
-    toast({
-      title: 'Collection Cleared',
-      description: 'All items have been removed from your collection.'
-    });
+  const isInCollection = (itemId: string) => {
+    return items.some(item => item.id === itemId);
   };
 
   return {
     items,
-    isLoading,
+    loading,
     addItem,
     removeItem,
-    clearCollection,
-    refreshCollection: loadCollection
+    isInCollection,
+    count: items.length
   };
-};
+}

@@ -1,6 +1,6 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './useAuth';
 import { sendSampleRequest, sendSupplierEmail } from '@/lib/emailService';
@@ -36,22 +36,27 @@ export const useSampleRequest = () => {
       if (!user) throw new Error('User must be logged in');
 
       const requestData = {
-        ...data,
-        user_id: user.id,
+        fabric_id: data.fabricId,
+        fabric_name: data.fabricName,
+        supplier_name: data.supplierName,
+        supplier_email: data.supplierEmail,
+        buyer_id: user.id,
         buyer_name: user.email?.split('@')[0] || 'User',
         buyer_email: user.email || '',
         buyer_company: user.user_metadata?.company || 'N/A',
+        quantity: data.quantity,
+        address: data.address,
+        urgency: data.urgency,
+        notes: data.notes,
         status: 'pending'
       };
 
-      if (isSupabaseConfigured) {
-        // Save to database
-        const { error } = await supabase
-          .from('sample_requests')
-          .insert(requestData);
+      // Save to database
+      const { error } = await supabase
+        .from('sample_requests_new')
+        .insert(requestData);
 
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       // Send email to supplier
       await sendSampleRequest({
@@ -98,23 +103,27 @@ export const useReserveYardage = () => {
       if (!user) throw new Error('User must be logged in');
 
       const reservationData = {
-        ...data,
-        user_id: user.id,
+        fabric_id: data.fabricId,
+        fabric_name: data.fabricName,
+        supplier_name: data.supplierName,
+        supplier_email: data.supplierEmail,
+        buyer_id: user.id,
         buyer_name: user.email?.split('@')[0] || 'User',
         buyer_email: user.email || '',
         buyer_company: user.user_metadata?.company || 'N/A',
+        yards: data.yards,
+        duration: data.duration,
+        notes: data.notes,
         status: 'pending',
         expires_at: new Date(Date.now() + data.duration * 24 * 60 * 60 * 1000).toISOString()
       };
 
-      if (isSupabaseConfigured) {
-        // Save to database
-        const { error } = await supabase
-          .from('reservations')
-          .insert(reservationData);
+      // Save to database
+      const { error } = await supabase
+        .from('reservations_new')
+        .insert(reservationData);
 
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       // Send email to supplier
       await sendSupplierEmail({
@@ -189,6 +198,80 @@ export const useContactSupplier = () => {
       toast({
         title: 'Error',
         description: 'Failed to send message. Please try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+// Quote request functionality
+export const useCreateQuoteRequest = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      title: string;
+      supplierName: string;
+      supplierEmail: string;
+      materialType: string;
+      quantity: number;
+      unit: string;
+      targetDate: string;
+      notes?: string;
+    }) => {
+      if (!user) throw new Error('User must be logged in');
+
+      const rfqId = `RFQ-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      const quoteData = {
+        rfq_id: rfqId,
+        title: data.title,
+        buyer_id: user.id,
+        supplier_id: data.supplierEmail, // Using email as supplier ID for now
+        supplier_name: data.supplierName,
+        supplier_email: data.supplierEmail,
+        material_type: data.materialType,
+        quantity: data.quantity,
+        unit: data.unit,
+        target_date: data.targetDate,
+        notes: data.notes,
+        status: 'pending'
+      };
+
+      // Save to database
+      const { error } = await supabase
+        .from('quote_requests')
+        .insert(quoteData);
+
+      if (error) throw error;
+
+      // Send email to supplier
+      await sendSupplierEmail({
+        supplierName: data.supplierName,
+        supplierEmail: data.supplierEmail,
+        buyerName: user.email?.split('@')[0] || 'User',
+        buyerEmail: user.email || '',
+        buyerCompany: user.user_metadata?.company || 'N/A',
+        subject: `Quote Request: ${data.title} (${rfqId})`,
+        message: `Please provide a quote for the following:\n\nMaterial: ${data.materialType}\nQuantity: ${data.quantity} ${data.unit}\nTarget Date: ${data.targetDate}\n\nNotes: ${data.notes || 'None'}\n\nRFQ ID: ${rfqId}`,
+      });
+
+      return quoteData;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Quote Request Sent',
+        description: 'Your quote request has been sent to the supplier.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['quote-requests'] });
+    },
+    onError: (error) => {
+      console.error('Quote request error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send quote request. Please try again.',
         variant: 'destructive',
       });
     },

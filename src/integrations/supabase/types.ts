@@ -24,6 +24,42 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          fabric_id: string | null
+          fabric_name: string | null
+          id: string
+          supplier_email: string
+          supplier_id: string
+          supplier_name: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          fabric_id?: string | null
+          fabric_name?: string | null
+          id?: string
+          supplier_email: string
+          supplier_id: string
+          supplier_name: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          fabric_id?: string | null
+          fabric_name?: string | null
+          id?: string
+          supplier_email?: string
+          supplier_id?: string
+          supplier_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event: {
         Row: {
           created_at: string | null
@@ -286,6 +322,50 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          file_url: string | null
+          id: string
+          message_type: string | null
+          sender_email: string
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          message_type?: string | null
+          sender_email: string
+          sender_id: string
+          sender_name: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          message_type?: string | null
+          sender_email?: string
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_break: {
         Row: {
           fabric_id: string | null
@@ -352,6 +432,75 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_requests: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          has_attachments: boolean | null
+          has_unread_messages: boolean | null
+          id: string
+          material_type: string
+          notes: string | null
+          price_currency: string | null
+          price_per_unit: boolean | null
+          price_value: number | null
+          quantity: number
+          rfq_id: string
+          status: string | null
+          supplier_email: string
+          supplier_id: string
+          supplier_name: string
+          target_date: string
+          title: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          has_attachments?: boolean | null
+          has_unread_messages?: boolean | null
+          id?: string
+          material_type: string
+          notes?: string | null
+          price_currency?: string | null
+          price_per_unit?: boolean | null
+          price_value?: number | null
+          quantity: number
+          rfq_id: string
+          status?: string | null
+          supplier_email: string
+          supplier_id: string
+          supplier_name: string
+          target_date: string
+          title: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          has_attachments?: boolean | null
+          has_unread_messages?: boolean | null
+          id?: string
+          material_type?: string
+          notes?: string | null
+          price_currency?: string | null
+          price_per_unit?: boolean | null
+          price_value?: number | null
+          quantity?: number
+          rfq_id?: string
+          status?: string | null
+          supplier_email?: string
+          supplier_id?: string
+          supplier_name?: string
+          target_date?: string
+          title?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reservation: {
         Row: {
           created_at: string | null
@@ -391,6 +540,63 @@ export type Database = {
           },
         ]
       }
+      reservations_new: {
+        Row: {
+          buyer_company: string | null
+          buyer_email: string
+          buyer_id: string
+          buyer_name: string
+          created_at: string
+          duration: number
+          expires_at: string
+          fabric_id: string
+          fabric_name: string
+          id: string
+          notes: string | null
+          status: string | null
+          supplier_email: string
+          supplier_name: string
+          updated_at: string
+          yards: number
+        }
+        Insert: {
+          buyer_company?: string | null
+          buyer_email: string
+          buyer_id: string
+          buyer_name: string
+          created_at?: string
+          duration: number
+          expires_at: string
+          fabric_id: string
+          fabric_name: string
+          id?: string
+          notes?: string | null
+          status?: string | null
+          supplier_email: string
+          supplier_name: string
+          updated_at?: string
+          yards: number
+        }
+        Update: {
+          buyer_company?: string | null
+          buyer_email?: string
+          buyer_id?: string
+          buyer_name?: string
+          created_at?: string
+          duration?: number
+          expires_at?: string
+          fabric_id?: string
+          fabric_name?: string
+          id?: string
+          notes?: string | null
+          status?: string | null
+          supplier_email?: string
+          supplier_name?: string
+          updated_at?: string
+          yards?: number
+        }
+        Relationships: []
+      }
       sample_request: {
         Row: {
           created_at: string | null
@@ -422,6 +628,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sample_requests_new: {
+        Row: {
+          address: string
+          buyer_company: string | null
+          buyer_email: string
+          buyer_id: string
+          buyer_name: string
+          created_at: string
+          fabric_id: string
+          fabric_name: string
+          id: string
+          notes: string | null
+          quantity: number
+          status: string | null
+          supplier_email: string
+          supplier_name: string
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          address: string
+          buyer_company?: string | null
+          buyer_email: string
+          buyer_id: string
+          buyer_name: string
+          created_at?: string
+          fabric_id: string
+          fabric_name: string
+          id?: string
+          notes?: string | null
+          quantity: number
+          status?: string | null
+          supplier_email: string
+          supplier_name: string
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          address?: string
+          buyer_company?: string | null
+          buyer_email?: string
+          buyer_id?: string
+          buyer_name?: string
+          created_at?: string
+          fabric_id?: string
+          fabric_name?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          status?: string | null
+          supplier_email?: string
+          supplier_name?: string
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: []
       }
       trim: {
         Row: {

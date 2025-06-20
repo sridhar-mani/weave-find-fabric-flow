@@ -1,33 +1,42 @@
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import AdminGuard from '@/components/AdminGuard';
 import PageHeader from '@/components/PageHeader';
 
-interface AuthUser {
+interface UserProfile {
   id: string;
   email: string;
+  full_name: string;
   created_at: string;
+  role: string;
 }
 
 const AdminUsers: React.FC = () => {
-  const [users, setUsers] = useState<AuthUser[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const loadUsers = async () => {
-      // Note: supabase anon key cannot list auth users. Replace with proper API or table.
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, email, created_at');
-      if (error) {
-        console.error('Error fetching users:', error.message);
-      } else if (data) {
-        setUsers(data);
+      try {
+        // Fetch from profiles table instead of users table
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, email, full_name, created_at, role')
+          .order('created_at', { ascending: false });
+          
+        if (error) {
+          console.error('Error fetching users:', error.message);
+        } else if (data) {
+          setUsers(data);
+        }
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     loadUsers();
   }, []);
@@ -38,27 +47,39 @@ const AdminUsers: React.FC = () => {
         <PageHeader title="User Management" description="Manage application users" />
         <Card>
           <CardHeader>
-            <CardTitle>Users</CardTitle>
+            <CardTitle>Users ({users.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
               <p>Loading users...</p>
+            ) : users.length === 0 ? (
+              <p>No users found. Users will appear here once they sign up for the application.</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Full Name</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Created At</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((u) => (
-                    <TableRow key={u.id}>
-                      <TableCell>{u.id}</TableCell>
-                      <TableCell>{u.email}</TableCell>
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-mono text-xs">{user.id.substring(0, 8)}...</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.full_name || 'Not provided'}</TableCell>
                       <TableCell>
-                        {new Date(u.created_at).toLocaleString()}
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          user.role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {user.role || 'user'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(user.created_at).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}
