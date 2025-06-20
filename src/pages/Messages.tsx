@@ -56,6 +56,7 @@ const MessagesPage: React.FC = () => {
         // Transform data to match the expected format
         const transformedConversations: Conversation[] = (conversationsData || []).map(conv => ({
           id: conv.id,
+          title: `Conversation with ${conv.supplier_name}`,
           participants: [
             activeUser,
             {
@@ -75,7 +76,10 @@ const MessagesPage: React.FC = () => {
             type: msg.message_type || 'text',
             fileUrl: msg.file_url,
           })),
+          createdAt: new Date(conv.created_at),
           lastActivity: new Date(conv.updated_at),
+          lastMessageAt: new Date(conv.updated_at),
+          unreadCount: 0,
           fabricId: conv.fabric_id,
           fabricName: conv.fabric_name,
         }));
@@ -147,7 +151,7 @@ const MessagesPage: React.FC = () => {
     }
   };
 
-  const handleStartConversation = async (supplierName: string, supplierEmail: string, fabricId?: string, fabricName?: string) => {
+  const handleCreateConversation = async (supplierName: string, supplierEmail: string, fabricId?: string, fabricName?: string) => {
     if (!user) return;
 
     try {
@@ -212,7 +216,7 @@ const MessagesPage: React.FC = () => {
         conversations={conversations}
         activeUser={activeUser}
         onSendMessage={handleSendMessage}
-        onStartConversation={handleStartConversation}
+        onCreateConversation={handleCreateConversation}
       />
     </div>
   );
