@@ -76,9 +76,9 @@ const MessagesPage: React.FC = () => {
             type: msg.message_type || 'text',
             fileUrl: msg.file_url,
           })),
-          createdAt: new Date(conv.created_at),
-          lastActivity: new Date(conv.updated_at),
-          lastMessageAt: new Date(conv.updated_at),
+          createdAt: new Date(conv.created_at).toISOString(),
+          lastActivity: new Date(conv.updated_at).toISOString(),
+          lastMessageAt: new Date(conv.updated_at).toISOString(),
           unreadCount: 0,
           fabricId: conv.fabric_id,
           fabricName: conv.fabric_name,
@@ -151,7 +151,19 @@ const MessagesPage: React.FC = () => {
     }
   };
 
-  const handleCreateConversation = async (supplierName: string, supplierEmail: string, fabricId?: string, fabricName?: string) => {
+  // Updated to match the expected signature from B2BMessagingSystem
+  const handleCreateConversation = (participants: string[], title: string, initialMessage: string) => {
+    if (!user || participants.length === 0) return;
+    
+    // Extract supplier info from the first participant (assuming it's the supplier email)
+    const supplierEmail = participants[0];
+    const supplierName = title.replace('Conversation with ', '') || supplierEmail.split('@')[0];
+    
+    // Call the actual creation function
+    createConversationWithSupplier(supplierName, supplierEmail, undefined, undefined, initialMessage);
+  };
+
+  const createConversationWithSupplier = async (supplierName: string, supplierEmail: string, fabricId?: string, fabricName?: string, initialMessage?: string) => {
     if (!user) return;
 
     try {
@@ -170,7 +182,7 @@ const MessagesPage: React.FC = () => {
       }
 
       // Create new conversation
-      const { error } = await supabase
+      const { data: newConv, error } = await supabase
         .from('conversations')
         .insert({
           buyer_id: user.id,
@@ -179,9 +191,24 @@ const MessagesPage: React.FC = () => {
           supplier_email: supplierEmail,
           fabric_id: fabricId,
           fabric_name: fabricName,
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // If there's an initial message, send it
+      if (initialMessage && newConv) {
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: newConv.id,
+            content: initialMessage,
+            sender_id: user.id,
+            sender_name: user.email?.split('@')[0] || 'User',
+            sender_email: user.email || '',
+          });
+      }
 
       // Reload conversations
       window.location.reload();

@@ -28,11 +28,10 @@ interface Fabric {
 }
 
 interface Filters {
-  material: string[];
-  color: string[];
-  pattern: string[];
-  supplier: string[];
-  priceRange: [number, number];
+  construction: string[];
+  gsm: [number, number];
+  finishes: string[];
+  categories: string[];
 }
 
 const Explore: React.FC = () => {
@@ -41,11 +40,10 @@ const Explore: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({
-    material: [],
-    color: [],
-    pattern: [],
-    supplier: [],
-    priceRange: [0, 100]
+    construction: [],
+    gsm: [50, 500],
+    finishes: [],
+    categories: []
   });
 
   const { addItem, isInCollection } = useCollection();
@@ -84,35 +82,24 @@ const Explore: React.FC = () => {
       );
     }
 
-    // Apply other filters
-    if (filters.material.length > 0) {
+    // Apply category filters (map to material)
+    if (filters.categories.length > 0) {
       filtered = filtered.filter(fabric => 
-        fabric.material && filters.material.includes(fabric.material)
+        fabric.material && filters.categories.includes(fabric.material)
       );
     }
 
-    if (filters.color.length > 0) {
+    // Apply finishes filters (map to tags if available)
+    if (filters.finishes.length > 0) {
       filtered = filtered.filter(fabric => 
-        fabric.color && filters.color.includes(fabric.color)
+        fabric.tags && fabric.tags.some(tag => filters.finishes.includes(tag))
       );
     }
 
-    if (filters.pattern.length > 0) {
-      filtered = filtered.filter(fabric => 
-        fabric.pattern && filters.pattern.includes(fabric.pattern)
-      );
-    }
-
-    if (filters.supplier.length > 0) {
-      filtered = filtered.filter(fabric => 
-        fabric.supplier && filters.supplier.includes(fabric.supplier)
-      );
-    }
-
-    // Apply price range filter
+    // Apply GSM filter (map to weight)
     filtered = filtered.filter(fabric => {
-      const price = fabric.price_per_yard || 0;
-      return price >= filters.priceRange[0] && price <= filters.priceRange[1];
+      const weight = fabric.weight || 0;
+      return weight >= filters.gsm[0] && weight <= filters.gsm[1];
     });
 
     setFilteredFabrics(filtered);
@@ -156,7 +143,6 @@ const Explore: React.FC = () => {
         {/* Sidebar */}
         <div className="w-full lg:w-1/4">
           <FacetSidebar
-            fabrics={fabrics}
             filters={filters}
             onFiltersChange={setFilters}
           />

@@ -18,9 +18,9 @@ interface FacetSidebarProps {
   onFiltersChange: (filters: any) => void;
 }
 
-const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
-  const categories = ['Natural Fiber', 'Luxury Fiber', 'Workwear', 'Synthetic Fiber'];
-  const finishes = ['Waterproof', 'Wrinkle-resistant', 'Anti-microbial', 'UV Protection'];
+const FacetSidebar = ({ filters = { construction: [], gsm: [50, 500], finishes: [], categories: [] }, onFiltersChange }: FacetSidebarProps) => {
+  const categories = ['Natural Fiber', 'Luxury Fiber', 'Workwear', 'Synthetic Fiber', 'Cotton', 'Linen', 'Silk', 'Wool'];
+  const finishes = ['Waterproof', 'Wrinkle-resistant', 'Anti-microbial', 'UV Protection', 'Organic', 'Fair Trade'];
 
   const updateFilters = (key: string, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
@@ -42,10 +42,9 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
     });
   };
 
-  const hasActiveFilters = filters.categories.length > 0 || 
-                          filters.finishes.length > 0 || 
-                          filters.gsm[0] !== 50 || 
-                          filters.gsm[1] !== 500;
+  const hasActiveFilters = (filters.categories?.length || 0) > 0 || 
+                          (filters.finishes?.length || 0) > 0 || 
+                          (filters.gsm && (filters.gsm[0] !== 50 || filters.gsm[1] !== 500));
 
   return (
     <motion.div 
@@ -77,9 +76,9 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
       <div className="mb-8">
         <h3 className="text-sm font-semibold text-stone-700 mb-4 flex items-center gap-2">
           Category
-          {filters.categories.length > 0 && (
+          {(filters.categories?.length || 0) > 0 && (
             <span className="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">
-              {filters.categories.length}
+              {filters.categories?.length || 0}
             </span>
           )}
         </h3>
@@ -113,18 +112,18 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
       {/* GSM Range */}
       <div className="mb-8">
         <h3 className="text-sm font-semibold text-stone-700 mb-4">
-          GSM Range
+          Weight Range (GSM)
         </h3>
         <div className="px-3 py-4 bg-stone-50 rounded-lg">
           <div className="flex justify-between text-sm text-stone-600 mb-3">
-            <span className="font-medium">{filters.gsm[0]} GSM</span>
-            <span className="font-medium">{filters.gsm[1]} GSM</span>
+            <span className="font-medium">{filters.gsm?.[0] || 50} GSM</span>
+            <span className="font-medium">{filters.gsm?.[1] || 500} GSM</span>
           </div>
           <Slider
-            value={filters.gsm}
+            value={filters.gsm || [50, 500]}
             onValueChange={(value) => updateFilters('gsm', value as [number, number])}
             max={500}
-            min={0}
+            min={50}
             step={10}
             className="w-full"
           />
@@ -136,10 +135,10 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
       {/* Finishes */}
       <div className="mb-8">
         <h3 className="text-sm font-semibold text-stone-700 mb-4 flex items-center gap-2">
-          Finishes
-          {filters.finishes.length > 0 && (
+          Finishes & Features
+          {(filters.finishes?.length || 0) > 0 && (
             <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">
-              {filters.finishes.length}
+              {filters.finishes?.length || 0}
             </span>
           )}
         </h3>
@@ -171,7 +170,7 @@ const FacetSidebar = ({ filters, onFiltersChange }: FacetSidebarProps) => {
           animate={{ opacity: 1, y: 0 }}
         >
           <p className="text-sm text-amber-800 font-medium">
-            {filters.categories.length + filters.finishes.length} filters active
+            {(filters.categories?.length || 0) + (filters.finishes?.length || 0)} filters active
           </p>
         </motion.div>
       )}
