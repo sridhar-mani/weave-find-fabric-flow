@@ -75,6 +75,8 @@ const MessagesPage: React.FC = () => {
             timestamp: new Date(msg.created_at),
             type: msg.message_type || 'text',
             fileUrl: msg.file_url,
+            conversationId: conv.id,
+            isRead: true,
           })),
           createdAt: new Date(conv.created_at).toISOString(),
           lastActivity: new Date(conv.updated_at).toISOString(),
