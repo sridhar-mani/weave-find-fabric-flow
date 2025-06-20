@@ -72,7 +72,7 @@ const MessagesPage: React.FC = () => {
             id: msg.id,
             content: msg.content,
             senderId: msg.sender_id,
-            timestamp: new Date(msg.created_at),
+            timestamp: new Date(msg.created_at).toISOString(),
             type: msg.message_type || 'text',
             fileUrl: msg.file_url,
             conversationId: conv.id,
@@ -153,15 +153,12 @@ const MessagesPage: React.FC = () => {
     }
   };
 
-  // Updated to match the expected signature from B2BMessagingSystem
   const handleCreateConversation = (participants: string[], title: string, initialMessage: string) => {
     if (!user || participants.length === 0) return;
     
-    // Extract supplier info from the first participant (assuming it's the supplier email)
     const supplierEmail = participants[0];
     const supplierName = title.replace('Conversation with ', '') || supplierEmail.split('@')[0];
     
-    // Call the actual creation function
     createConversationWithSupplier(supplierName, supplierEmail, undefined, undefined, initialMessage);
   };
 
@@ -169,7 +166,6 @@ const MessagesPage: React.FC = () => {
     if (!user) return;
 
     try {
-      // Check if conversation already exists
       const { data: existingConv } = await supabase
         .from('conversations')
         .select('id')
@@ -183,12 +179,11 @@ const MessagesPage: React.FC = () => {
         return;
       }
 
-      // Create new conversation
       const { data: newConv, error } = await supabase
         .from('conversations')
         .insert({
           buyer_id: user.id,
-          supplier_id: supplierEmail, // Using email as ID for now
+          supplier_id: supplierEmail,
           supplier_name: supplierName,
           supplier_email: supplierEmail,
           fabric_id: fabricId,
@@ -199,7 +194,6 @@ const MessagesPage: React.FC = () => {
 
       if (error) throw error;
 
-      // If there's an initial message, send it
       if (initialMessage && newConv) {
         await supabase
           .from('messages')
@@ -212,7 +206,6 @@ const MessagesPage: React.FC = () => {
           });
       }
 
-      // Reload conversations
       window.location.reload();
     } catch (error) {
       console.error('Error starting conversation:', error);
@@ -221,32 +214,38 @@ const MessagesPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div>
-        <PageHeader
-          title="Messages"
-          description="View and manage your conversations"
-          breadcrumbs={[{ label: "Home", path: "/" }, { label: "Messages" }]}
-        />
-        <div className="flex items-center justify-center h-64">
-          <p>Loading conversations...</p>
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50/20">
+        <div className="p-6">
+          <PageHeader
+            title="Messages"
+            description="View and manage your conversations"
+            breadcrumbs={[{ label: "Home", path: "/" }, { label: "Messages" }]}
+          />
+          <div className="flex items-center justify-center h-64">
+            <p>Loading conversations...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <PageHeader
-        title="Messages"
-        description="View and manage your conversations"
-        breadcrumbs={[{ label: "Home", path: "/" }, { label: "Messages" }]}
-      />
-      <B2BMessagingSystem
-        conversations={conversations}
-        activeUser={activeUser}
-        onSendMessage={handleSendMessage}
-        onCreateConversation={handleCreateConversation}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50/20">
+      <div className="p-6">
+        <PageHeader
+          title="Messages"
+          description="View and manage your conversations"
+          breadcrumbs={[{ label: "Home", path: "/" }, { label: "Messages" }]}
+        />
+        <div className="mt-6">
+          <B2BMessagingSystem
+            conversations={conversations}
+            activeUser={activeUser}
+            onSendMessage={handleSendMessage}
+            onCreateConversation={handleCreateConversation}
+          />
+        </div>
+      </div>
     </div>
   );
 };

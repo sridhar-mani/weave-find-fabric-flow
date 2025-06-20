@@ -131,111 +131,119 @@ const Explore: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading fabrics...</div>
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50/20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+        <span className="ml-2 text-lg">Loading fabrics...</span>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar */}
-        <div className="w-full lg:w-1/4">
-          <FacetSidebar
-            filters={filters}
-            onFiltersChange={setFilters}
-          />
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50/20">
+      <div className="p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-stone-800 mb-2">Explore Fabrics</h1>
+          <p className="text-stone-600">Discover premium fabrics from verified suppliers</p>
         </div>
 
-        {/* Main Content */}
-        <div className="w-full lg:w-3/4">
-          {/* Search Bar */}
-          <div className="relative mb-8">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search fabrics..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sidebar */}
+          <div className="w-full lg:w-1/4">
+            <FacetSidebar
+              filters={filters}
+              onFiltersChange={setFilters}
             />
           </div>
 
-          {/* Results Count */}
-          <div className="mb-6">
-            <p className="text-gray-600">
-              Showing {filteredFabrics.length} of {fabrics.length} fabrics
-            </p>
-          </div>
-
-          {/* Fabric Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredFabrics.map((fabric) => (
-              <Card key={fabric.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                {fabric.image_url && (
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={fabric.image_url}
-                      alt={fabric.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{fabric.name}</CardTitle>
-                  {fabric.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {fabric.description}
-                    </p>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {fabric.material && (
-                      <Badge variant="secondary">{fabric.material}</Badge>
-                    )}
-                    {fabric.color && (
-                      <Badge variant="outline">{fabric.color}</Badge>
-                    )}
-                    {fabric.pattern && (
-                      <Badge variant="outline">{fabric.pattern}</Badge>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    {fabric.supplier && (
-                      <p><span className="font-medium">Supplier:</span> {fabric.supplier}</p>
-                    )}
-                    {fabric.price_per_yard && (
-                      <p><span className="font-medium">Price:</span> ${fabric.price_per_yard}/yard</p>
-                    )}
-                    {fabric.width && (
-                      <p><span className="font-medium">Width:</span> {fabric.width}"</p>
-                    )}
-                    {fabric.stock_quantity !== undefined && (
-                      <p><span className="font-medium">Stock:</span> {fabric.stock_quantity} yards</p>
-                    )}
-                  </div>
-
-                  <Button
-                    onClick={() => handleAddToCollection(fabric)}
-                    disabled={isInCollection(fabric.id)}
-                    className="w-full"
-                    variant={isInCollection(fabric.id) ? "secondary" : "default"}
-                  >
-                    {isInCollection(fabric.id) ? 'In Collection' : 'Add to Collection'}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredFabrics.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No fabrics found matching your criteria.</p>
-              <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
+          {/* Main Content */}
+          <div className="w-full lg:w-3/4">
+            {/* Search Bar */}
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search fabrics..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          )}
+
+            {/* Results Count */}
+            <div className="mb-6">
+              <p className="text-gray-600">
+                Showing {filteredFabrics.length} of {fabrics.length} fabrics
+              </p>
+            </div>
+
+            {/* Fabric Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredFabrics.map((fabric) => (
+                <Card key={fabric.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  {fabric.image_url && (
+                    <div className="aspect-square overflow-hidden">
+                      <img
+                        src={fabric.image_url}
+                        alt={fabric.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">{fabric.name}</CardTitle>
+                    {fabric.description && (
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {fabric.description}
+                      </p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {fabric.material && (
+                        <Badge variant="secondary">{fabric.material}</Badge>
+                      )}
+                      {fabric.color && (
+                        <Badge variant="outline">{fabric.color}</Badge>
+                      )}
+                      {fabric.pattern && (
+                        <Badge variant="outline">{fabric.pattern}</Badge>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      {fabric.supplier && (
+                        <p><span className="font-medium">Supplier:</span> {fabric.supplier}</p>
+                      )}
+                      {fabric.price_per_yard && (
+                        <p><span className="font-medium">Price:</span> ${fabric.price_per_yard}/yard</p>
+                      )}
+                      {fabric.width && (
+                        <p><span className="font-medium">Width:</span> {fabric.width}"</p>
+                      )}
+                      {fabric.stock_quantity !== undefined && (
+                        <p><span className="font-medium">Stock:</span> {fabric.stock_quantity} yards</p>
+                      )}
+                    </div>
+
+                    <Button
+                      onClick={() => handleAddToCollection(fabric)}
+                      disabled={isInCollection(fabric.id)}
+                      className="w-full"
+                      variant={isInCollection(fabric.id) ? "secondary" : "default"}
+                    >
+                      {isInCollection(fabric.id) ? 'In Collection' : 'Add to Collection'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {filteredFabrics.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No fabrics found matching your criteria.</p>
+                <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
